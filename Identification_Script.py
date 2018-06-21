@@ -5,9 +5,8 @@ class HackingDrones:
     def __init__(self, known_ips):
         """The init method instantiates the known list of ips to track"""
         self.known_ips = known_ips
-        self.matched_ips = dict()
-        print("hi")
-        print(self.identification())
+        self.matched_ips = dict()   #format for this dictionary is potential matches' {IP: [channel, name]}
+        self.identification()
         
 
     def read_files(self, file_name, seperator = ", "):
@@ -18,24 +17,29 @@ class HackingDrones:
             raise FileNotFoundError ("Could not open {}".format(file_name))
         else:
             with fp:
+                x = 0
                 for line in fp:
-                    st_line = str(line)
-                    l = st_line.strip().split(seperator)
-                    print(l)
-                    yield l
+                    if x > 1:
+                        st_line = str(line)
+                        l = st_line.strip().split(seperator)
+                        if len(l) == 14:
+                            yield l
+                    x += 1
 
     def identification(self):
-        """This function takes the information from the generator and then attempts to identify if it is a known 
-           drone IP"""
+        """This function takes the information from the generator and then attempts to identify if a 
+           returned IP is a known drone IP, it then compiles a dictionary of matched IP's"""
         read_network_ips = self.read_files("output-01.csv", seperator = ", ")
-        for bssid, a, b, channel, d, e, f, g, h, i, j, k, l, name in read_network_ips:
-            if bssid[0:8] in self.known_ips:
-                self.matched_ips[bssid] = [channel, name]
+        for bssid, a, b, channel, d, e, f, g, h, i, j, k, name, l in read_network_ips:
+            if bssid[2:10] in self.known_ips:
+                print("Match found at this IP: {}".format(bssid[2:]))
+                self.matched_ips[bssid[2:]] = [channel, name]
+        print("Here are all the drone IP's: {}".format(self.matched_ips))
         return self.matched_ips
 
 def main():
     """This is where we run the program to check for known IPs"""
-    known_ips = set("3C:1E:04")
+    known_ips = set(["3C:1E:04"])
     hacking_drones = HackingDrones(known_ips)
 
 if __name__ == "__main__":
