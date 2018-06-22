@@ -1,4 +1,6 @@
 #!/bin/bash
+# Script for momentarily booting a user off of deauthentication their connected network.
+# [CH], [BSSID] and [STATION] variables parsed from Identification_Script.py
 
 echo "Disconnecting from WiFi networks:" & sleep 2
 
