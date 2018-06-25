@@ -1,0 +1,72 @@
+#!/usr/bin/env python
+import subprocess
+import csv
+import os
+import time
+
+class HackingDrones:
+    """Trying to hack drones and cool stuff"""
+    def __init__(self, known_ips, dirc = os.getcwd()):
+        """The init method instantiates the known list of ips to track"""
+        self.known_ips = known_ips
+        self.matched_ips = dict()   #format for this dictionary is potential matches' {IP: [channel, name]}
+        self.start(2)
+        self.identification()
+        os.chdir(dirc)
+        
+    def start(self, sleep_time):
+        """This method scans for Wifi networks and outputs them as a csv file to the desktop"""
+        sleep_time = sleep_time
+        self.run_bash("echo, Disconnecting from wifi networks")
+        time.sleep(sleep_time)
+        self.run_bash("airmon-ng")
+        self.run_bash("echo, Enabling Monitor Mode")
+        time.sleep(sleep_time)
+        self.run_bash("airmon-ng, start, wlan0mon")
+        self.run_bash("echo, Scanning for local networks")
+        time.sleep(sleep_time)
+        self.run_bash("airodump-ng, wlan0mon, -w, output, --output-format, csv")
+        time.sleep(5)
+        self.run_bash("kill, $!")
+
+    def read_files(self, file_name, expected_num_values, seperator = ", "):
+        """A generic read file generator to check bad file inputs and read line by line"""
+        try:
+            fp = open(file_name, 'rb') 
+        except FileNotFoundError: 
+            raise FileNotFoundError ("Could not open {}".format(file_name))
+        else:
+            with fp:
+                x = 0
+                for line in fp:
+                    if x > 1:
+                        st_line = str(line)
+                        l = st_line.strip().split(seperator)
+                        if len(l) == expected_num_values:
+                            yield l
+                    x += 1
+
+    def identification(self):
+        """This function takes the information from the generator and then attempts to identify if a 
+           returned IP is a known drone IP, it then compiles a dictionary of matched IP's"""
+        read_network_ips = self.read_files("output-01.csv", 14, seperator = ", ")
+        for bssid, first_time_seen, last_time_seen, channel, speed, privacy, cipher, authentication,\
+            power, beacons, IV, LAN, name, end in read_network_ips:
+            if bssid[2:10] in self.known_ips:
+                print("Match found at this IP: {}".format(bssid[2:]))
+                self.matched_ips[bssid[2:]] = [channel.strip(), name]
+        print("Here are all the drone IP's: {}".format(self.matched_ips))
+        return self.matched_ips
+
+    def run_bash(self, command, seperator = ", "):
+        """This function allows python to execute bash commands"""
+        bash_command = command
+        subprocess.Popen(bash_command.split(), shell=True)
+
+def main():
+    """This is where we run the program to check for known IPs"""
+    known_ips = set(["3C:1E:04"])
+    hacking_drones = HackingDrones(known_ips)
+
+if __name__ == "__main__":
+    main()
