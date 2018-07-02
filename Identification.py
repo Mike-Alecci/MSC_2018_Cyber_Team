@@ -4,7 +4,6 @@ import csv
 import os
 import time
 
-
 class HackingDrones:
     """Trying to hack drones and cool stuff. This automates the process using the aircrack modules"""
     def __init__(self, known_ips, dirc = os.getcwd()):
@@ -23,18 +22,18 @@ class HackingDrones:
         """This method scans for Wifi networks and outputs them as a csv file to the desktop.
 	   The user only has to enact the Keyboard interrupt to stop the scanning when desired."""
         self.run_bash("echo Disconnecting from wifi networks")
-	time.sleep(1)
-	self.run_bash("airmon-ng")
-	time.sleep(1)
-	self.run_bash("echo Enabling Monitor Mode")
-	time.sleep(1)
-	self.run_bash("airmon-ng start wlan0mon")
-	self.run_bash("echo Scanning for local network, hit the Keyboard Interrupt 'ctrl+C' to stop scanning")
-	time.sleep(1)
+        time.sleep(1)
+        self.run_bash("airmon-ng")
+        time.sleep(1)
+        self.run_bash("echo Enabling Monitor Mode")
+        time.sleep(1)
+        self.run_bash("airmon-ng start wlan0mon")
+        self.run_bash("echo Scanning for local network, hit the Keyboard Interrupt 'ctrl+C' to stop scanning")
+        time.sleep(1)
         try:
-	    self.run_bash("airodump-ng wlan0 -w output --output-format csv")
+	        self.run_bash("airodump-ng wlan0 -w output --output-format csv")
         except KeyboardInterrupt:
-	    self.run_bash("killall airodump-ng")
+	        self.run_bash("killall airodump-ng")
     
     def read_files(self, file_name, expected_num_values, seperator = ", "):
         """A generic read file generator to check bad file inputs and read line by line"""
@@ -55,7 +54,7 @@ class HackingDrones:
 
     def identification(self):
         """This function takes the information from the generator and then attempts to identify if a 
-           returned IP is a known drone IP, it then compiles a dictionary of matched IP's"""
+        returned IP is a known drone IP, it then compiles a dictionary of matched IP's"""
         read_network_ips = self.read_files("output-01.csv", 14, seperator = ", ")
         for bssid, first_time_seen, last_time_seen, channel, speed, privacy, cipher, authentication,\
             power, beacons, IV, LAN, en, name in read_network_ips:
@@ -65,6 +64,15 @@ class HackingDrones:
         print("Here are all the drone IP's: {}".format(self.matched_ips))
         return self.matched_ips
 
+    def clean_up(self, file_name):
+        """This function deletes the scan results and other output files to prepare for the next 
+        run-through of the script."""
+        try:
+            os.path.isfile(file_name)
+        except:
+            raise FileNotFoundError ("Could not open {}".format(file_name))
+        os.remove(file_name)
+        return print("Scan results cleared.")
 
 def main():
     """This is where we run the program to check for known IPs"""
