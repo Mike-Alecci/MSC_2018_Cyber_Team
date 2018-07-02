@@ -70,7 +70,7 @@ class HackingDrones:
         try:
             os.path.isfile(file_name)
         except:
-            raise FileNotFoundError ("Could not open {}".format(file_name))
+            raise FileNotFoundError ("Could not find {}".format(file_name))
         os.remove(file_name)
         return print("Scan results cleared.")
 
