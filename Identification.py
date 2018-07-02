@@ -64,14 +64,13 @@ class HackingDrones:
         print("Here are all the drone IP's: {}".format(self.matched_ips))
         return self.matched_ips
 
-    def clean_up(self, file_name):
+    def clean_up(self, file_name, dirc = os.getcwd()):
         """This function deletes the scan results and other output files to prepare for the next 
         run-through of the script."""
         try:
-            os.path.isfile(file_name)
+            os.remove(file_name)
         except:
-            raise FileNotFoundError ("Could not find {}".format(file_name))
-        os.remove(file_name)
+            raise FileNotFoundError ("Could not find {}".format(file_name))    
         return print("Scan results cleared.")
 
 def main():
