@@ -71,7 +71,8 @@ class HackingDrones:
             os.remove(file_name)
         except:
             raise FileNotFoundError ("Could not find {}".format(file_name))    
-        return print("Scan results cleared.")
+        print("Scan results cleared.")
+	return None
 
 def main():
     """This is where we run the program to check for known IPs"""
