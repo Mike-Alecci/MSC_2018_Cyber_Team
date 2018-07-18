@@ -6,14 +6,15 @@ import time
 
 class HackingDrones:
     """Trying to hack drones and cool stuff. This automates the process using the aircrack modules"""
-    def __init__(self, known_ips, dirc = os.getcwd()):
+    def __init__(self, known_ips, file_name, dirc = os.getcwd()):
         """The init method instantiates the known list of ips to track. It also runs the full automation process."""
         self.known_ips = known_ips
 	os.chdir(dirc)
-        self.matched_ips = dict()   #Format for this dictionary is potential matches' {IP: [channel, name]}
+        self.matched_ips = dict()   #Format for this dictionary is potential matches' {IP: [channel, name, time_found]}
         self.start()		    #This functions results in a outputted csv file of network information 
         self.identification()
-	self.kill(self.matched_ips)
+	self.save_info(file_name, self.matched_ips)
+	self.kill(self.matched_ips)	
 	self.clean_up(["output-01.csv"])
 
     def run_bash(self, cmd):
@@ -62,9 +63,22 @@ class HackingDrones:
             power, beacons, IV, LAN, en, name in read_network_ips:
             if bssid[:8] in self.known_ips:
                 print("Match found at this IP: {}".format(bssid))
-                self.matched_ips[bssid] = [channel.strip(), name[:-1]]
+                self.matched_ips[bssid] = [channel.strip(), name[:-1], time.asctime()]
         print("Here are all the drone IP's: {}".format(self.matched_ips))
         return None
+
+    def save_info(self, file_name, matched_ips):
+	"""This saves all matches found, and the dates and times they were found to a text file"""
+	try:
+            fp = open(file_name, 'a') 
+        except FileNotFoundError: 
+            raise FileNotFoundError ("Could not open {}".format(file_name))
+        else:
+            with fp:
+		for match in matched_ips.keys():
+		    fp.write("Match found at this time: {}, IP address: {}, Name: {}, Channel: {}\n".format(matched_ips[match][2], match, matched_ips[match][1], matched_ips[match][0]))
+
+	
 
     def kill(self, kill_list):
 	"""This deauths the drones"""
@@ -102,7 +116,7 @@ class HackingDrones:
 def main():
     """This is where we run the program to check for known IPs"""
     known_ips = set(["90:3A:E6", "90:03:B7", "A0:14:3D", "00:26:7E", "00:12:1C"])    #18:64:72 use this Ip(Steven's network) to test identification is working, DO NOT attempt to deauth any devices on this IP
-    hacking_drones = HackingDrones(known_ips)
+    hacking_drones = HackingDrones(known_ips, "Saved_matches")
 
 if __name__ == "__main__":
     main()
