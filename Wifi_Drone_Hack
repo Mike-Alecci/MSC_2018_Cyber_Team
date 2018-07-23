@@ -6,15 +6,16 @@ import time
 
 class HackingDrones:
     """Trying to hack drones and cool stuff. This automates the process using the aircrack modules"""
-    def __init__(self, known_ips, file_name, dirc = os.getcwd()):
+    def __init__(self, known_ips, keywords, file_name, dirc = os.getcwd()):
         """The init method instantiates the known list of ips to track. It also runs the full automation process."""
         self.known_ips = known_ips
+	self.keywords = keywords
 	os.chdir(dirc)
         self.matched_ips = dict()   #Format for this dictionary is potential matches' {IP: [channel, name, time_found]}
         self.start()		    #This functions results in a outputted csv file of network information 
         self.identification()
 	self.save_info(file_name, self.matched_ips)
-	self.kill(self.matched_ips)	
+	#self.kill(self.matched_ips)	
 	self.clean_up(["output-01.csv"])
 
     def run_bash(self, cmd):
@@ -61,7 +62,7 @@ class HackingDrones:
         read_network_ips = self.read_files("output-01.csv", 14, 1, separator = ", ")
         for bssid, first_time_seen, last_time_seen, channel, speed, privacy, cipher, authentication,\
             power, beacons, IV, LAN, en, name in read_network_ips:
-            if bssid[:8] in self.known_ips:
+            if bssid[:8] in self.known_ips or name[:-1].lower() in self.keywords:
                 print("Match found at this IP: {}".format(bssid))
                 self.matched_ips[bssid] = [channel.strip(), name[:-1], time.asctime()]
         print("Here are all the drone IP's: {}".format(self.matched_ips))
@@ -77,8 +78,6 @@ class HackingDrones:
             with fp:
 		for match in matched_ips.keys():
 		    fp.write("Match found at this time: {}, IP address: {}, Name: {}, Channel: {}\n".format(matched_ips[match][2], match, matched_ips[match][1], matched_ips[match][0]))
-
-	
 
     def kill(self, kill_list):
 	"""This deauths the drones"""
@@ -102,7 +101,6 @@ class HackingDrones:
 		self.run_bash("killall aireplay-ng")
 	return None
 
-
     def clean_up(self, remove_list):
         """This function deletes the scan results and other output files to prepare for the next 
         run-through of the script."""
@@ -115,8 +113,9 @@ class HackingDrones:
 
 def main():
     """This is where we run the program to check for known IPs"""
-    known_ips = set(["90:3A:E6", "90:03:B7", "A0:14:3D", "00:26:7E", "00:12:1C"])    #18:64:72 use this Ip(Steven's network) to test identification is working, DO NOT attempt to deauth any devices on this IP
-    hacking_drones = HackingDrones(known_ips, "Saved_matches")
+    known_ips = set(["90:3A:E6", "90:03:B7", "A0:14:3D", "00:26:7E", "00:12:1C", "18:64:72"])    #18:64:72 use this Ip(Steven's network) to test identification is working, DO NOT attempt to deauth any devices on this IP
+    keywords = set(["drone", "dji", "3dr", "phantom", "mavic", "kespry", "parrot", "yuneec", "bebop", "uav", "uas"])
+    hacking_drones = HackingDrones(known_ips, keywords, "Saved_matches")
 
 if __name__ == "__main__":
     main()
